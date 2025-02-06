@@ -43,8 +43,8 @@ for i in range(0,len(seeds)-1,2):
     top=seeds[i+1]+bottom
     ranges.add((bottom,bottom,seeds[i+1]))
     total+=top
-print(total)
-print(ranges)
+print(f'total size of all ranges: {total}')
+print(f'{ranges}')
 
 #This logic is broken, I need to keep track of how each range maps to the next layer, so I can follow back from the lowest location range to a seed.
 #This should also probably be global? I can start with all the starting ranges, and build out from there
@@ -55,24 +55,35 @@ print(ranges)
 # finish by copying the temp set to the set of ranges
 
 for maplayer in maps:
+    print("next layer")
     heap=deque()
     tempranges=set()
     for r in ranges:
+#        print(r)
         heap.append(r)
-    while len(heap>0):
+    while len(heap)>0:
         s,b,o = heap.popleft()
-        for l,h,offset in xmap:
+        tempranges.add((s,b,o))
+        print(f'taken {s}, {b}, {o} off heap')
+        for l,h,offset in maplayer:
+            print(f'taken {l}, {h}, {offset} from maplayer')
             if l <= b <= h:
-                if b+o <= h:
+                tempranges.remove((s,b,o))
+                if b+o-1 <= h:
+                    print(f'{b}-{b+o-1} fits in {l}-{h}')
                     nb=b+offset
                     tempranges.add((s,nb,o))
-                elif t > h:
+                    break
+                elif b+o-1 > h:
                     nb=b+offset
-                    no=h-l
+                    no=h+1-b
                     tempranges.add((s,nb,no))
-                    nb=h+1
-                    no=o-(h-l)
-                    heap.append((s,nb,no))
+                    hb=h+1
+                    ho=o-no
+                    heap.append((s+no,hb,ho))
+                    print(f'{b}-{b+o-1} partially fits in {l}-{h}. new range is {s},{nb},{no}. Adding {s+no},{hb},{ho} to heap')
+                    break
+
     ranges=set(tempranges)
 
 #    for seed in range(bottom,top):
@@ -89,3 +100,12 @@ for maplayer in maps:
 #print (f'{results[min(results, key=results.get)]}')
 #
 #
+minl=10000000000000
+seed=0
+print(ranges)
+for t,l,_ in ranges:
+    if l<minl:
+        minl=l
+        seed=t
+
+print(f'min location is {minl}, at seed {seed}')
