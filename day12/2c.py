@@ -28,19 +28,24 @@ for line in f.readlines():
         lines[l]["blocks"].append(int(n))
     l+=1
 
-def permute(string,strindex,blocks,blindex):
+def perm(string,strindex,blocks,blindex):
     count=0
     if blindex<len(blocks):
         blocksize = blocks[blindex]
-        matchstring="([?#]{blocksize}[.?]+?)"
+        matchstring="([?#]{"+str(blocksize)+"}[.?]+?)"
+        print(strindex,blindex,matchstring)
         match=re.match(matchstring,string[strindex:])
         if match:
-            count+=permute(string,strindex+match.end,blocks,blindex+1)
+            count+=perm(string,strindex+match.end(),blocks,blindex+1)
         else:
             return 0
-   else:
+    else:
+       count+=1
     return count
 
+for line in lines:
+    count=perm(line["string"],0,line["blocks"],0)
+    print(count)
 
 li=["#","."]
 total=0
